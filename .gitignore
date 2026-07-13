@@ -1,0 +1,32 @@
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.log
+
+# ---- Node (belt-and-suspenders; mobile/ has its own too) ----
+node_modules/
+.expo/
+dist/
+web-build/
+
+# ---- PHP / Laravel (backend/ has its own too) ----
+/backend/vendor/
+/backend/.env
+/backend/storage/*.key
+
+# ---- Python ----
+python-service/venv/
+python-service/.venv/
+__pycache__/
+*.py[cod]
+.env
+
+# ---- SQLite (project uses PostgreSQL) ----
+*.sqlite
+*.sqlite-journal
+
+# ---- Build tool scratch (pgvector) ----
+/sql/pgvector-build/
