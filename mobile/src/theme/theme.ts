@@ -18,6 +18,9 @@ export const palette = {
   dangerSoft: '#FBEAE6',
   like: '#E0447A',
   likeSoft: '#FBE6EE',
+  imagePlaceholder: '#ECE7DF',
+  overlay: 'rgba(28, 26, 23, 0.45)',
+  onOverlay: '#FFFFFF',
 } as const;
 
 export const spacing = (n: number): number => n * 4;

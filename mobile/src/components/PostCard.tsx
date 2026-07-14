@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -15,10 +16,10 @@ interface PostCardProps {
 function PostCardComponent({ post, onReact }: PostCardProps) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(post.interactions_count ?? 0);
+  const [imageFailed, setImageFailed] = useState(false);
   const busy = useRef(false);
 
   const toggle = async () => {
-    // Unlike is local-only (no delete endpoint); like is optimistic + persisted.
     if (liked) {
       setLiked(false);
       setCount((c) => Math.max(0, c - 1));
@@ -38,10 +39,12 @@ function PostCardComponent({ post, onReact }: PostCardProps) {
     }
   };
 
+  const showImage = Boolean(post.image_url) && !imageFailed;
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Avatar name={post.author.name} />
+        <Avatar name={post.author.name} size={40} />
         <View style={styles.headerText}>
           <Text style={styles.username} numberOfLines={1}>
             {post.author.name}
@@ -55,10 +58,26 @@ function PostCardComponent({ post, onReact }: PostCardProps) {
         )}
       </View>
 
-      <Text style={styles.caption}>{post.caption}</Text>
+      {showImage ? (
+        <Image
+          source={post.image_url}
+          style={styles.image}
+          contentFit="cover"
+          transition={220}
+          onError={() => setImageFailed(true)}
+          accessibilityLabel={post.caption}
+        />
+      ) : (
+        <View style={[styles.image, styles.imageFallback]}>
+          <Text style={styles.fallbackGlyph}>✦</Text>
+        </View>
+      )}
 
-      <View style={styles.footer}>
-        <ReactionButton count={count} liked={liked} onPress={toggle} />
+      <View style={styles.body}>
+        <View style={styles.actions}>
+          <ReactionButton count={count} liked={liked} onPress={toggle} />
+        </View>
+        <Text style={styles.caption}>{post.caption}</Text>
       </View>
     </View>
   );
@@ -70,15 +89,17 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: palette.surface,
     borderRadius: radius.lg,
-    padding: spacing(4),
     borderWidth: 1,
     borderColor: palette.border,
+    overflow: 'hidden',
     ...shadow.card,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing(3),
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(3.5),
   },
   headerText: {
     flex: 1,
@@ -104,15 +125,32 @@ const styles = StyleSheet.create({
     fontWeight: font.weight.semibold,
     color: palette.accent,
   },
+  image: {
+    width: '100%',
+    aspectRatio: 4 / 5,
+    backgroundColor: palette.imagePlaceholder,
+  },
+  imageFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fallbackGlyph: {
+    fontSize: 44,
+    color: palette.textFaint,
+  },
+  body: {
+    paddingHorizontal: spacing(4),
+    paddingTop: spacing(3),
+    paddingBottom: spacing(4),
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   caption: {
     marginTop: spacing(3),
     fontSize: font.size.md,
     lineHeight: font.size.md * 1.45,
     color: palette.text,
-  },
-  footer: {
-    marginTop: spacing(3.5),
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });
