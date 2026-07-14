@@ -1,20 +1,25 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StatusBar as RNStatusBar, SafeAreaView, StyleSheet } from 'react-native';
+
+import { AuthProvider } from './src/auth/AuthContext';
+import { FeedScreen } from './src/screens/FeedScreen';
+import { palette } from './src/theme/theme';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.root}>
+      <StatusBar style="dark" />
+      <AuthProvider>
+        <FeedScreen />
+      </AuthProvider>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: palette.bg,
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
 });
