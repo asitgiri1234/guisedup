@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 
-import { reactToPost } from '../api/posts';
 import type { Post } from '../api/types';
 import { AppHeader } from '../components/AppHeader';
 import { PostCard } from '../components/PostCard';
@@ -32,17 +31,9 @@ export function FeedScreen() {
     token,
   );
 
-  const onReact = useCallback(
-    (postId: number) => {
-      if (!token) return Promise.reject(new Error('Not authenticated'));
-      return reactToPost(postId, token);
-    },
-    [token],
-  );
-
   const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<Post>) => <PostCard post={item} onReact={onReact} />,
-    [onReact],
+    ({ item }: ListRenderItemInfo<Post>) => <PostCard post={item} token={token} />,
+    [token],
   );
 
   const sectionLabel = useMemo(() => {

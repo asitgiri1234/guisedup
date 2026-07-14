@@ -99,7 +99,9 @@ Response `200`:
       "id": 12,
       "caption": "…",
       "image_url": "…",
-      "interactions_count": 3,
+      "interactions_count": 12,
+      "reactions": { "like": 8, "fire": 3, "clap": 1 },
+      "comments_count": 2,
       "author": { "id": 2, "name": "Bob Example" },
       "ranking_score": 0.5148,
       "created_at": "2026-07-14T05:09:38+00:00"
@@ -140,14 +142,45 @@ Request:
 ```json
 { "post_id": 12, "type": "like" }
 ```
-| Field     | Rules                                                  |
-|-----------|--------------------------------------------------------|
-| `post_id` | required, integer, must exist in `posts`               |
-| `type`    | required, one of `like`, `view`, `save`, `share`       |
+| Field     | Rules                                                            |
+|-----------|------------------------------------------------------------------|
+| `post_id` | required, integer, must exist in `posts`                         |
+| `type`    | required, one of `like`, `fire`, `clap`, `view`, `save`, `share` |
+
+`like` / `fire` / `clap` are the emoji reactions surfaced in the app (❤️ 🔥 👏);
+`view` / `save` / `share` are implicit signals.
 
 Response `201`:
 ```json
-{ "data": { "id": 31, "post_id": 12, "user_id": 1, "type": "like", "created_at": "…" } }
+{ "data": { "id": 31, "post_id": 12, "user_id": 1, "type": "fire", "created_at": "…" } }
+```
+
+---
+
+## Comments
+
+### GET `/api/posts/{post}/comments`
+List a post's comments, newest-first, paginated 20/page. **Auth required.**
+
+Response `200`:
+```json
+{
+  "data": [
+    { "id": 5, "body": "Obsessed with this.", "author": { "id": 3, "name": "Maya Chen" }, "created_at": "…" }
+  ],
+  "links": { "…": "…" },
+  "meta": { "current_page": 1, "last_page": 2, "per_page": 20, "total": 24 }
+}
+```
+
+### POST `/api/posts/{post}/comments`
+Add a comment. **Auth required.**
+
+Request: `{ "body": "Love this look!" }` — `body` required, string, max 1000.
+
+Response `201`:
+```json
+{ "data": { "id": 6, "body": "Love this look!", "author": { "id": 1, "name": "Alice Rivera" }, "created_at": "…" } }
 ```
 
 ---

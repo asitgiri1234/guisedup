@@ -21,6 +21,13 @@ class PostResource extends JsonResource
             'caption' => $this->caption,
             'image_url' => $this->image_url,
             'interactions_count' => $this->whenCounted('interactions'),
+            // Per-emoji reaction tallies (populated on feed/search).
+            'reactions' => [
+                'like' => (int) ($this->like_count ?? 0),
+                'fire' => (int) ($this->fire_count ?? 0),
+                'clap' => (int) ($this->clap_count ?? 0),
+            ],
+            'comments_count' => (int) ($this->comments_count ?? 0),
             'author' => new UserResource($this->whenLoaded('user')),
             // Present only on the ranked feed, for transparency/debugging.
             'ranking_score' => $this->when(

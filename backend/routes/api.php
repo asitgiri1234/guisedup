@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PostController;
@@ -21,4 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/feed', [FeedController::class, 'index']);
     Route::get('/search', [SearchController::class, 'index']);
     Route::post('/interactions', [InteractionController::class, 'store']);
+
+    Route::get('/posts/{post}/comments', [CommentController::class, 'index']);
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store']);
 });

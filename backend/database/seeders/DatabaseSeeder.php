@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\InteractionType;
+use App\Models\Comment;
 use App\Models\Interaction;
 use App\Models\Post;
 use App\Models\User;
@@ -56,12 +57,28 @@ class DatabaseSeeder extends Seeder
             $creators->where('id', '!=', $c->id)->random(2)->pluck('id')->all()
         ));
 
-        // Layered engagement: each post gets several likes/views/saves.
-        $posts->each(function (Post $post) use ($everyone): void {
-            $fans = $everyone->where('id', '!=', $post->user_id)->shuffle()->take(random_int(4, 16));
-            foreach ($fans as $index => $fan) {
+        // Layered engagement: each post gets a mix of emoji reactions and views.
+        $reactionTypes = [
+            InteractionType::Like->value,
+            InteractionType::Fire->value,
+            InteractionType::Clap->value,
+            InteractionType::Like->value,
+            InteractionType::View->value,
+        ];
+
+        $posts->each(function (Post $post) use ($everyone, $reactionTypes): void {
+            $fans = $everyone->where('id', '!=', $post->user_id)->shuffle()->take(random_int(5, 16));
+            foreach ($fans as $fan) {
                 Interaction::factory()->for($fan)->for($post)->create([
-                    'type' => $index % 4 === 0 ? InteractionType::View->value : InteractionType::Like->value,
+                    'type' => $reactionTypes[array_rand($reactionTypes)],
+                ]);
+            }
+
+            // A few comments per post.
+            $commenters = $everyone->where('id', '!=', $post->user_id)->shuffle()->take(random_int(1, 4));
+            foreach ($commenters as $commenter) {
+                Comment::factory()->for($commenter)->for($post)->create([
+                    'body' => $this->commentBodies()[array_rand($this->commentBodies())],
                 ]);
             }
         });
@@ -79,6 +96,27 @@ class DatabaseSeeder extends Seeder
                 'type' => InteractionType::Like->value,
             ]);
         }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function commentBodies(): array
+    {
+        return [
+            'Obsessed with this. 😍',
+            'Where is the coat from?',
+            'The proportions here are perfect.',
+            'Saving this for autumn inspo.',
+            'That colour on you 🔥',
+            'Need the full breakdown please!',
+            'Effortless as always.',
+            'This is my whole aesthetic.',
+            'Clean lines — love it.',
+            'Ok but the shoes though 👟',
+            'Styling goals, honestly.',
+            'How is this so good every time?',
+        ];
     }
 
     /**

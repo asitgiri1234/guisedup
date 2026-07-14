@@ -88,9 +88,10 @@ in `expo-secure-store` and attaches it as a bearer header.
 ```
 users (id, name, email, authenticity_score, …)
   1───∞ posts (id, user_id, caption, image_url, embedding vector(384), …)
-  1───∞ interactions (id, user_id, post_id, type[like|view|save|share], …)
+  1───∞ interactions (id, user_id, post_id, type[like|fire|clap|view|save|share], …)
+  1───∞ comments (id, user_id, post_id, body, …)
 follows (follower_id, followed_id)               -- viewer ↔ author graph
-posts 1───∞ interactions
+posts 1───∞ interactions,  posts 1───∞ comments
 ```
 
 ## Key decisions & trade-offs

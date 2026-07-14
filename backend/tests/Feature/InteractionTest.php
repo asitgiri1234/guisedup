@@ -36,6 +36,20 @@ class InteractionTest extends TestCase
         ]);
     }
 
+    public function test_emoji_reaction_types_are_accepted(): void
+    {
+        $post = Post::factory()->for(User::factory())->create();
+        Sanctum::actingAs(User::factory()->create());
+
+        foreach (['like', 'fire', 'clap'] as $type) {
+            $this->postJson('/api/interactions', ['post_id' => $post->id, 'type' => $type])
+                ->assertCreated()
+                ->assertJsonPath('data.type', $type);
+        }
+
+        $this->assertDatabaseCount('interactions', 3);
+    }
+
     public function test_interaction_requires_an_existing_post(): void
     {
         Sanctum::actingAs(User::factory()->create());

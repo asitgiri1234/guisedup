@@ -29,7 +29,7 @@ class FeedService
 
         $candidates = Post::query()
             ->with('user')
-            ->withCount('interactions')
+            ->withEngagementCounts()
             ->where('user_id', '!=', $viewer->id)
             ->whereNotNull('embedding')
             ->latest()

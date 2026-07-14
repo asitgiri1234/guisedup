@@ -1,42 +1,28 @@
 import { Image } from 'expo-image';
-import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Post } from '../api/types';
+import { reactToPost } from '../api/posts';
+import type { Post, ReactionType } from '../api/types';
 import { font, palette, radius, shadow, spacing } from '../theme/theme';
 import { timeAgo } from '../utils/timeAgo';
 import { Avatar } from './Avatar';
-import { ReactionButton } from './ReactionButton';
+import { CommentsModal } from './CommentsModal';
+import { ReactionBar } from './ReactionBar';
 
 interface PostCardProps {
   post: Post;
-  onReact: (postId: number) => Promise<unknown>;
+  token: string | null;
 }
 
-function PostCardComponent({ post, onReact }: PostCardProps) {
-  const [liked, setLiked] = useState(false);
-  const [count, setCount] = useState(post.interactions_count ?? 0);
+function PostCardComponent({ post, token }: PostCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
-  const busy = useRef(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(post.comments_count ?? 0);
 
-  const toggle = async () => {
-    if (liked) {
-      setLiked(false);
-      setCount((c) => Math.max(0, c - 1));
-      return;
-    }
-    if (busy.current) return;
-    busy.current = true;
-    setLiked(true);
-    setCount((c) => c + 1);
-    try {
-      await onReact(post.id);
-    } catch {
-      setLiked(false);
-      setCount((c) => Math.max(0, c - 1));
-    } finally {
-      busy.current = false;
-    }
+  const onReact = (type: ReactionType) => {
+    if (!token) return Promise.reject(new Error('Not authenticated'));
+    return reactToPost(post.id, type, token);
   };
 
   const showImage = Boolean(post.image_url) && !imageFailed;
@@ -75,10 +61,38 @@ function PostCardComponent({ post, onReact }: PostCardProps) {
 
       <View style={styles.body}>
         <View style={styles.actions}>
-          <ReactionButton count={count} liked={liked} onPress={toggle} />
+          <ReactionBar counts={post.reactions} onReact={onReact} />
+          <View style={styles.actionsSpacer} />
+          <Pressable
+            onPress={() => setCommentsOpen(true)}
+            hitSlop={6}
+            accessibilityRole="button"
+            accessibilityLabel="Comments"
+            style={({ pressed }) => [styles.commentButton, pressed && styles.commentPressed]}
+          >
+            <Text style={styles.commentGlyph}>💬</Text>
+            <Text style={styles.commentCount}>{commentCount}</Text>
+          </Pressable>
         </View>
+
         <Text style={styles.caption}>{post.caption}</Text>
+
+        {commentCount > 0 && (
+          <Pressable onPress={() => setCommentsOpen(true)}>
+            <Text style={styles.viewComments}>
+              View {commentCount === 1 ? '1 comment' : `all ${commentCount} comments`}
+            </Text>
+          </Pressable>
+        )}
       </View>
+
+      <CommentsModal
+        visible={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        postId={post.id}
+        token={token}
+        onAdded={() => setCommentCount((c) => c + 1)}
+      />
     </View>
   );
 }
@@ -146,11 +160,44 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing(2),
+  },
+  actionsSpacer: {
+    flex: 1,
+  },
+  commentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing(1.5),
+    paddingVertical: spacing(1.5),
+    paddingHorizontal: spacing(2.5),
+    borderRadius: radius.pill,
+    backgroundColor: palette.surfaceAlt,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  commentPressed: {
+    opacity: 0.7,
+  },
+  commentGlyph: {
+    fontSize: font.size.md,
+  },
+  commentCount: {
+    fontSize: font.size.sm,
+    fontWeight: font.weight.semibold,
+    color: palette.textMuted,
+    minWidth: 12,
+    textAlign: 'center',
   },
   caption: {
     marginTop: spacing(3),
     fontSize: font.size.md,
     lineHeight: font.size.md * 1.45,
     color: palette.text,
+  },
+  viewComments: {
+    marginTop: spacing(2),
+    fontSize: font.size.sm,
+    color: palette.textMuted,
   },
 });

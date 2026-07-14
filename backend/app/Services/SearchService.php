@@ -27,7 +27,7 @@ class SearchService
 
         return Post::query()
             ->with('user')
-            ->withCount('interactions')
+            ->withEngagementCounts()
             ->whereNotNull('embedding')
             ->orderByRaw('embedding <=> ?::vector', [$literal])
             ->paginate($perPage);
