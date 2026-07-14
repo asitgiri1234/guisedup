@@ -19,9 +19,7 @@ class FeedRankerTest extends TestCase
     {
         return new class($attribute, $key) implements RankingSignal
         {
-            public function __construct(private string $attribute, private string $key)
-            {
-            }
+            public function __construct(private string $attribute, private string $key) {}
 
             public function key(): string
             {
@@ -47,7 +45,7 @@ class FeedRankerTest extends TestCase
             ['a' => 0.25, 'b' => 0.75],
         );
 
-        $post = new Post();
+        $post = new Post;
         $post->a = 0.4;
         $post->b = 0.8;
 

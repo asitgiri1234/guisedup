@@ -17,8 +17,7 @@ class RelationshipDepthSignal implements RankingSignal
         private readonly float $followWeight = 0.5,
         private readonly float $interactionWeight = 0.5,
         private readonly float $interactionScale = 3.0,
-    ) {
-    }
+    ) {}
 
     public function key(): string
     {

@@ -2,10 +2,12 @@
 
 namespace App\Services\Contracts;
 
+use App\Services\Embedding\MockEmbeddingService;
+
 /**
  * Contract for turning text into a dense vector embedding.
  *
- * Phase 2 binds this to {@see \App\Services\Embedding\MockEmbeddingService}.
+ * Phase 2 binds this to {@see MockEmbeddingService}.
  * Phase 3 will bind a real implementation that calls the Python service,
  * with no changes required in any consumer.
  */

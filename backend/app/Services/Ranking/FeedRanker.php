@@ -19,8 +19,7 @@ class FeedRanker
     public function __construct(
         private readonly array $signals,
         private readonly array $weights,
-    ) {
-    }
+    ) {}
 
     /**
      * The blended score for a single post: sum of weight * signal.

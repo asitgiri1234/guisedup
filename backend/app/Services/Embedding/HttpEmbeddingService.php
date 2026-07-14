@@ -17,8 +17,7 @@ class HttpEmbeddingService implements EmbeddingService
         private readonly string $baseUrl,
         private readonly int $dimensions,
         private readonly int $timeout = 10,
-    ) {
-    }
+    ) {}
 
     public function embed(string $text): array
     {

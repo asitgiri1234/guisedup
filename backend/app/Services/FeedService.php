@@ -21,9 +21,7 @@ use Illuminate\Support\Facades\DB;
  */
 class FeedService
 {
-    public function __construct(private readonly FeedRanker $ranker)
-    {
-    }
+    public function __construct(private readonly FeedRanker $ranker) {}
 
     public function paginate(User $viewer, ?int $perPage = null): LengthAwarePaginator
     {
@@ -55,7 +53,8 @@ class FeedService
             ->join('posts', 'posts.id', '=', 'interactions.post_id')
             ->where('interactions.user_id', $viewer->id)
             ->groupBy('posts.user_id')
-            ->pluck(DB::raw('count(*)'), 'posts.user_id')
+            ->selectRaw('posts.user_id as author_id, count(*) as interactions')
+            ->pluck('interactions', 'author_id')
             ->map(static fn ($count): int => (int) $count)
             ->all();
 

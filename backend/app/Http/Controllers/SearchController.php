@@ -9,9 +9,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SearchController extends Controller
 {
-    public function __construct(private readonly SearchService $search)
-    {
-    }
+    public function __construct(private readonly SearchService $search) {}
 
     /**
      * GET /api/search?q=... — semantic search over posts (20 per page).

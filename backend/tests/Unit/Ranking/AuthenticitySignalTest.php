@@ -18,7 +18,7 @@ class AuthenticitySignalTest extends TestCase
     private function postByAuthorWithScore(float $score): Post
     {
         $author = new User(['authenticity_score' => $score]);
-        $post = new Post();
+        $post = new Post;
         $post->setRelation('user', $author);
 
         return $post;
@@ -26,14 +26,14 @@ class AuthenticitySignalTest extends TestCase
 
     public function test_it_returns_the_authors_authenticity_score(): void
     {
-        $signal = new AuthenticitySignal();
+        $signal = new AuthenticitySignal;
 
         $this->assertEqualsWithDelta(0.8, $signal->score($this->postByAuthorWithScore(0.8), $this->context()), 1e-9);
     }
 
     public function test_it_clamps_scores_into_the_unit_interval(): void
     {
-        $signal = new AuthenticitySignal();
+        $signal = new AuthenticitySignal;
 
         $this->assertSame(1.0, $signal->score($this->postByAuthorWithScore(1.5), $this->context()));
         $this->assertSame(0.0, $signal->score($this->postByAuthorWithScore(-0.2), $this->context()));

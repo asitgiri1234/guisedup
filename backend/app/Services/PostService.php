@@ -8,9 +8,7 @@ use App\Services\Contracts\EmbeddingService;
 
 class PostService
 {
-    public function __construct(private readonly EmbeddingService $embeddings)
-    {
-    }
+    public function __construct(private readonly EmbeddingService $embeddings) {}
 
     /**
      * Create a post for the given author and attach its embedding.

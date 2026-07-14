@@ -61,9 +61,9 @@ class AppServiceProvider extends ServiceProvider
 
             return new FeedRanker(
                 signals: [
-                    new AuthenticitySignal(),
-                    new RelationshipDepthSignal(),
-                    new SemanticSimilaritySignal(),
+                    new AuthenticitySignal,
+                    new RelationshipDepthSignal,
+                    new SemanticSimilaritySignal,
                     new TimeDecaySignal((float) ($config['time_decay_tau_hours'] ?? 72)),
                 ],
                 weights: $config['weights'] ?? [],

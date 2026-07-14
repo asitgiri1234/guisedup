@@ -14,9 +14,7 @@ use App\Services\Contracts\EmbeddingService;
  */
 class MockEmbeddingService implements EmbeddingService
 {
-    public function __construct(private int $dimensions = 384)
-    {
-    }
+    public function __construct(private int $dimensions = 384) {}
 
     public function embed(string $text): array
     {
@@ -24,7 +22,7 @@ class MockEmbeddingService implements EmbeddingService
         $bytes = '';
         $counter = 0;
         while (strlen($bytes) < $this->dimensions) {
-            $bytes .= hash('sha256', $text . '#' . $counter, true);
+            $bytes .= hash('sha256', $text.'#'.$counter, true);
             $counter++;
         }
 

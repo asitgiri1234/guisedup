@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Guised Up",
+    "slug": "guisedup",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

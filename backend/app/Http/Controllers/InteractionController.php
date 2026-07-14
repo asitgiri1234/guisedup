@@ -9,9 +9,7 @@ use Illuminate\Http\JsonResponse;
 
 class InteractionController extends Controller
 {
-    public function __construct(private readonly InteractionService $interactions)
-    {
-    }
+    public function __construct(private readonly InteractionService $interactions) {}
 
     /**
      * POST /api/interactions — log an engagement event for the current user.

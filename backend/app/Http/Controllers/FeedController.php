@@ -9,9 +9,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class FeedController extends Controller
 {
-    public function __construct(private readonly FeedService $feed)
-    {
-    }
+    public function __construct(private readonly FeedService $feed) {}
 
     /**
      * GET /api/feed — ranked, personalised feed for the current user (20 per page).

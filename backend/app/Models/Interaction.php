@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Enums\InteractionType;
+use Database\Factories\InteractionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Interaction extends Model
 {
-    /** @use HasFactory<\Database\Factories\InteractionFactory> */
+    /** @use HasFactory<InteractionFactory> */
     use HasFactory;
 
     protected $fillable = [

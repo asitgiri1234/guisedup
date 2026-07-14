@@ -20,8 +20,7 @@ class RankingContext
         public readonly array $interactionCountsByAuthor,
         public readonly ?array $profileVector,
         public readonly CarbonInterface $now,
-    ) {
-    }
+    ) {}
 
     public function follows(int $authorId): bool
     {

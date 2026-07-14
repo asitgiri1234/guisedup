@@ -9,9 +9,7 @@ use Illuminate\Http\JsonResponse;
 
 class PostController extends Controller
 {
-    public function __construct(private readonly PostService $posts)
-    {
-    }
+    public function __construct(private readonly PostService $posts) {}
 
     /**
      * POST /api/posts — create a post authored by the current user.

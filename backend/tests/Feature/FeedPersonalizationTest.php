@@ -52,6 +52,38 @@ class FeedPersonalizationTest extends TestCase
         );
     }
 
+    public function test_semantic_affinity_promotes_similar_posts(): void
+    {
+        $viewer = User::factory()->create();
+
+        // The viewer engages with a post — this builds their taste vector and
+        // interaction history (exercises the personalisation context with data).
+        $tasteAuthor = User::factory()->create();
+        $tastePost = Post::factory()->for($tasteAuthor)->create([
+            'caption' => 'minimalist beige trench coat outfit',
+        ]);
+        $viewer->interactions()->create(['post_id' => $tastePost->id, 'type' => 'like']);
+
+        // Two candidates by other, unfollowed authors with equal authenticity:
+        // one matches the taste, one does not. Only semantic similarity differs.
+        $similar = Post::factory()
+            ->for(User::factory()->create(['authenticity_score' => 0.6]))
+            ->create(['caption' => 'minimalist beige trench coat outfit']);
+        $different = Post::factory()
+            ->for(User::factory()->create(['authenticity_score' => 0.6]))
+            ->create(['caption' => 'loud neon graphic streetwear hoodie']);
+
+        Sanctum::actingAs($viewer);
+
+        $ids = Collection::make($this->getJson('/api/feed')->assertOk()->json('data'))->pluck('id');
+
+        $this->assertLessThan(
+            $ids->search($different->id),
+            $ids->search($similar->id),
+            "A post matching the viewer's taste vector should outrank a dissimilar one.",
+        );
+    }
+
     public function test_feed_exposes_a_ranking_score(): void
     {
         Post::factory(2)->for(User::factory())->create();

@@ -11,7 +11,7 @@ class RelationshipDepthSignalTest extends TestCase
 {
     private function postByAuthor(int $authorId): Post
     {
-        $post = new Post();
+        $post = new Post;
         $post->user_id = $authorId;
 
         return $post;
@@ -24,7 +24,7 @@ class RelationshipDepthSignalTest extends TestCase
 
     public function test_following_an_author_scores_higher_than_not_following(): void
     {
-        $signal = new RelationshipDepthSignal();
+        $signal = new RelationshipDepthSignal;
         $post = $this->postByAuthor(42);
 
         $following = $signal->score($post, $this->context([42], []));
@@ -36,7 +36,7 @@ class RelationshipDepthSignalTest extends TestCase
 
     public function test_more_past_interactions_increase_the_score(): void
     {
-        $signal = new RelationshipDepthSignal();
+        $signal = new RelationshipDepthSignal;
         $post = $this->postByAuthor(42);
 
         $few = $signal->score($post, $this->context([], [42 => 1]));
@@ -47,7 +47,7 @@ class RelationshipDepthSignalTest extends TestCase
 
     public function test_score_stays_within_the_unit_interval(): void
     {
-        $signal = new RelationshipDepthSignal();
+        $signal = new RelationshipDepthSignal;
         $post = $this->postByAuthor(42);
 
         $score = $signal->score($post, $this->context([42], [42 => 1000]));

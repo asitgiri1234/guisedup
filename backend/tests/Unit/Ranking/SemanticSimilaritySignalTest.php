@@ -11,7 +11,7 @@ class SemanticSimilaritySignalTest extends TestCase
 {
     private function postWithEmbedding(array $vector): Post
     {
-        $post = new Post();
+        $post = new Post;
         $post->embedding = $vector; // Vector cast serialises on set
 
         return $post;
@@ -24,7 +24,7 @@ class SemanticSimilaritySignalTest extends TestCase
 
     public function test_it_is_neutral_when_the_viewer_has_no_profile(): void
     {
-        $signal = new SemanticSimilaritySignal();
+        $signal = new SemanticSimilaritySignal;
 
         $score = $signal->score($this->postWithEmbedding([1, 0, 0]), $this->context(null));
 
@@ -33,7 +33,7 @@ class SemanticSimilaritySignalTest extends TestCase
 
     public function test_aligned_embeddings_score_higher_than_opposed_ones(): void
     {
-        $signal = new SemanticSimilaritySignal();
+        $signal = new SemanticSimilaritySignal;
         $profile = [1.0, 0.0, 0.0];
 
         $aligned = $signal->score($this->postWithEmbedding([1.0, 0.0, 0.0]), $this->context($profile));

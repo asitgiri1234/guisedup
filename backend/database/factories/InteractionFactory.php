@@ -3,12 +3,13 @@
 namespace Database\Factories;
 
 use App\Enums\InteractionType;
+use App\Models\Interaction;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<\App\Models\Interaction>
+ * @extends Factory<Interaction>
  */
 class InteractionFactory extends Factory
 {

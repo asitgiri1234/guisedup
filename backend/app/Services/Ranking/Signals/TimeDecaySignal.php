@@ -12,9 +12,7 @@ use App\Services\Ranking\RankingSignal;
  */
 class TimeDecaySignal implements RankingSignal
 {
-    public function __construct(private readonly float $tauHours = 72.0)
-    {
-    }
+    public function __construct(private readonly float $tauHours = 72.0) {}
 
     public function key(): string
     {

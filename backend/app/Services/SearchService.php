@@ -10,9 +10,7 @@ class SearchService
 {
     public const PER_PAGE = 20;
 
-    public function __construct(private readonly EmbeddingService $embeddings)
-    {
-    }
+    public function __construct(private readonly EmbeddingService $embeddings) {}
 
     /**
      * Semantic search: embed the query and return the nearest posts by cosine
