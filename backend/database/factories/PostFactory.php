@@ -16,14 +16,13 @@ class PostFactory extends Factory
      */
     public function definition(): array
     {
-        $caption = fake()->sentence(nbWords: 8);
-
         return [
             'user_id' => User::factory(),
-            'caption' => $caption,
+            'caption' => fake()->sentence(nbWords: 8),
             'image_url' => fake()->imageUrl(),
-            // Same contract the app uses — the mock in Phase 2, the real model later.
-            'embedding' => app(EmbeddingService::class)->embed($caption),
+            // Derived from the FINAL caption (including create() overrides) via the
+            // same contract the app uses — the mock in tests, the real model in prod.
+            'embedding' => fn (array $attributes) => app(EmbeddingService::class)->embed($attributes['caption']),
         ];
     }
 }

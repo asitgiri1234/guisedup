@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PostResource;
 use App\Services\FeedService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class FeedController extends Controller
@@ -13,10 +14,10 @@ class FeedController extends Controller
     }
 
     /**
-     * GET /api/feed — ranked, paginated feed (20 per page).
+     * GET /api/feed — ranked, personalised feed for the current user (20 per page).
      */
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
-        return PostResource::collection($this->feed->paginate());
+        return PostResource::collection($this->feed->paginate($request->user()));
     }
 }

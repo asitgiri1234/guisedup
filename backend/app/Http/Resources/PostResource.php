@@ -21,6 +21,11 @@ class PostResource extends JsonResource
             'image_url' => $this->image_url,
             'interactions_count' => $this->whenCounted('interactions'),
             'author' => new UserResource($this->whenLoaded('user')),
+            // Present only on the ranked feed, for transparency/debugging.
+            'ranking_score' => $this->when(
+                isset($this->ranking_score),
+                fn () => round((float) $this->ranking_score, 4),
+            ),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

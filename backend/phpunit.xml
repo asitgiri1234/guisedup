@@ -29,6 +29,9 @@
              is committed. -->
         <env name="DB_CONNECTION" value="pgsql"/>
         <env name="DB_DATABASE" value="guisedup_test"/>
+        <!-- Tests use the deterministic mock embedder so they stay fast and do
+             not depend on the Python service being up. -->
+        <env name="EMBEDDING_DRIVER" value="mock"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

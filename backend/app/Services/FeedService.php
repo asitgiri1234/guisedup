@@ -3,44 +3,111 @@
 namespace App\Services;
 
 use App\Models\Post;
+use App\Models\User;
+use App\Services\Ranking\FeedRanker;
+use App\Services\Ranking\RankingContext;
+use App\Support\VectorMath;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * Builds a personalised, ranked feed for a viewer.
+ *
+ * A bounded candidate set is pulled from the database, then scored in-memory by
+ * the reusable {@see FeedRanker} (authenticity + relationship depth + semantic
+ * similarity + time decay) and paginated.
+ */
 class FeedService
 {
-    /** Weight applied to a post's (log-scaled) engagement. */
-    private const POPULARITY_WEIGHT = 1.0;
-
-    /** Penalty per hour of age, giving fresher posts a lift. */
-    private const RECENCY_WEIGHT = 0.05;
-
-    public const PER_PAGE = 20;
-
-    /**
-     * Return the ranked, paginated feed.
-     *
-     * Ranking is a transparent blend of engagement and recency:
-     *
-     *   score = POPULARITY_WEIGHT * ln(1 + interactions)
-     *         - RECENCY_WEIGHT    * age_in_hours
-     *
-     * This is intentionally simple and explainable for Phase 2. Phase 3 will
-     * layer personalised, embedding-based relevance on top of this baseline.
-     */
-    public function paginate(int $perPage = self::PER_PAGE): LengthAwarePaginator
+    public function __construct(private readonly FeedRanker $ranker)
     {
-        // The engagement count is inlined as a correlated subquery rather than
-        // reusing the withCount() alias: PostgreSQL only resolves output aliases
-        // in ORDER BY when they stand alone, not inside a larger expression.
-        $engagement = '(select count(*) from interactions where interactions.post_id = posts.id)';
+    }
 
-        $score = '('.self::POPULARITY_WEIGHT.' * ln(1 + '.$engagement.')) '
-            .'- ('.self::RECENCY_WEIGHT.' * (EXTRACT(EPOCH FROM (now() - posts.created_at)) / 3600.0))';
+    public function paginate(User $viewer, ?int $perPage = null): LengthAwarePaginator
+    {
+        $perPage ??= (int) config('feed.per_page', 20);
 
-        return Post::query()
+        $candidates = Post::query()
             ->with('user')
             ->withCount('interactions')
-            ->orderByRaw($score.' DESC')
-            ->orderByDesc('id')
-            ->paginate($perPage);
+            ->where('user_id', '!=', $viewer->id)
+            ->whereNotNull('embedding')
+            ->latest()
+            ->limit((int) config('feed.candidate_limit', 500))
+            ->get();
+
+        $ranked = $this->ranker->rank($candidates, $this->contextFor($viewer));
+
+        return $this->paginateCollection($ranked, $perPage);
+    }
+
+    /**
+     * Precompute everything the signals need about this viewer.
+     */
+    private function contextFor(User $viewer): RankingContext
+    {
+        $followedAuthorIds = $viewer->following()->pluck('users.id')->all();
+
+        /** @var array<int, int> $interactionCounts */
+        $interactionCounts = DB::table('interactions')
+            ->join('posts', 'posts.id', '=', 'interactions.post_id')
+            ->where('interactions.user_id', $viewer->id)
+            ->groupBy('posts.user_id')
+            ->pluck(DB::raw('count(*)'), 'posts.user_id')
+            ->map(static fn ($count): int => (int) $count)
+            ->all();
+
+        return new RankingContext(
+            viewerId: $viewer->id,
+            followedAuthorIds: array_map('intval', $followedAuthorIds),
+            interactionCountsByAuthor: $interactionCounts,
+            profileVector: $this->profileVectorFor($viewer),
+            now: now(),
+        );
+    }
+
+    /**
+     * The viewer's taste vector: the mean embedding of the posts they've
+     * engaged with. Null when they have no engagement history yet.
+     *
+     * @return list<float>|null
+     */
+    private function profileVectorFor(User $viewer): ?array
+    {
+        $vectors = Post::query()
+            ->whereNotNull('embedding')
+            ->whereIn('id', function ($query) use ($viewer): void {
+                $query->select('post_id')
+                    ->from('interactions')
+                    ->where('user_id', $viewer->id);
+            })
+            ->get(['id', 'embedding'])
+            ->map(static fn (Post $post): array => $post->embedding->toArray())
+            ->all();
+
+        return VectorMath::mean($vectors);
+    }
+
+    /**
+     * Wrap an already-ordered collection in a length-aware paginator.
+     *
+     * @param  Collection<int, Post>  $items
+     */
+    private function paginateCollection(Collection $items, int $perPage): LengthAwarePaginator
+    {
+        $page = Paginator::resolveCurrentPage();
+
+        return new Paginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ],
+        );
     }
 }
